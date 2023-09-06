@@ -18,16 +18,16 @@ library(WaveletComp)
 
 * This R coding module shows provides a basis for analyzing speech-gesture synchrony using a cross-wavelet approach. The approach builds on, and uses the end data frame from the MultimodalMerging module. Note that this is not meant to be a comprehensive theoretical discussion or in-depth guide on the underlying machinery of cross-wavelet analysis, but rather a starting point for understanding how to apply this methodology, how it differs from the peak analysis described in MultimodalMerging. For a more technical guide for wavelet approaches, see Issartel et al., 2006 ( https://doi.org/10.3200/JMBR.38.2.139-159) and Issartel et al., 2015 ( https://doi.org/10.3389/fpsyg.2014.01566 )
 
-* location Repository:  https://github.com/WimPouw/envisionBOX_modulesWP/tree/main/CrossWavelet
+* location Repository: https://github.com/jptrujillo/CrossWavelet_SpeechGesture_Synchrony
 
-* location Rmarkdown: https://github.com/WimPouw/envisionBOX_modulesWP/blob/main/CrossWavelet/CrossWavelet_SG_synchrony.Rmd
+
 
 * citation: Trujillo, J.P. (`r Sys.Date()`). *Quantifying Speech-Gesture Synchrony Using Cross-Wavelet Analysis*. [the day you viewed the site]. Retrieved from: https://envisionbox.org/embedded_CrossWavelet_SG_synchrony.html
 
 
 ## Background
 
-In studying multimodal human communication, the dynamical coupling between different modalities can be an important topic. It can allow us to better understand how different components of the multimodal communication system work together, and how this dynamical system develops and adapts to contextual demands. While peak-to-peak analysis has a strong foundation in the literature, it is limited to testing how two far apart two discrete time-points (i.e., the peak of kinematic motion and the peak of an auditory signal, such as intensity or pitch) are from one another. However, even when only considering the motion and acoustic time-series, there is more to speech and gesture than just their peaks. It can therefore be useful to also utilize methods that take more of the shape of these time-series into account when calculating synchrony. For this purpose, we consider the Cross-Wavelet Transform.
+In studying multimodal human communication, the dynamical coupling between different modalities can be an important topic. It can allow us to better understand how different components of the multimodal communication system work together, and how this dynamical system develops and adapts to contextual demands. While peak-to-peak analysis has a strong foundation in the literature, it is limited to testing how far apart two discrete time-points (i.e., the peak of kinematic motion and the peak of an auditory signal, such as intensity or pitch) are from one another. However, even when only considering the motion and acoustic time-series, there is more to speech and gesture than just their peaks. It can therefore be useful to also utilize methods that take more of the shape of these time-series into account when calculating synchrony. For this purpose, we consider the Cross-Wavelet Transform.
 
 At the core of this analysis, is the notion of relative phase. That is, how similarly to one another two time-series are changing. If the two series are changing in the same direction, at the same time, yields a relative phase of 0 (i.e., in-phase). When the two are moving in opposite directions,  this is called anti-phase. Continuous Relative Phase (CRT) then provides a measure of synchronization at each time point.
 ![](./images/phase.jpg){ align=”center”}
@@ -43,6 +43,8 @@ Returning to the notion of relative phase, we move to the "cross" part of cross-
 The minimum sampling rate is recommended as two times the highest frequency of the time-series. For example, average syllable duration is estimated at around 4Hz (0.25s), so we could take this, or a slightly higher value, as the highest frequency of interest. This means that sampling must be at least 4x2=8HZ.
 
 The two time-series must also have the same length, and the same sampling rate. The alignment performed in the previous module is therefore a useful starting point for data preparation!
+
+Cross-wavelet analysis is when the two time-series have similar time scales. So in cases where polyrhythms are expected, cross-wavelets were perform more poorly. 
 
 
 ## Set up folders and check data formats
@@ -63,7 +65,6 @@ outputfolder <- paste0(curfolder, "/output/")
 ```
 
 
-# TODO: 
 # INTRO, and adjust analysis
 We must define a few parameters, most of which have been discussed above.
 dt: time units. This is given as a fraction of a second
@@ -90,8 +91,8 @@ for (gesture in gesture_ID){
   w.syll <- analyze.coherency(CW_data, 
                               loess.span = 0,                         #does the series need to be smoothed?
                               dt = 1/100,                             #what are time units (100Hz, i., 0.01 seconds)
-                              dj = 1/100,                              #what is the resolution in the frequency domain that you want have? Here we set 0.01s (i.e., 1/50) 
-                              lowerPeriod = 0.2,                    #the fastest period of interest we set at 8Hz (faster than the average syllable)
+                              dj = 1/50,                              #what is the resolution in the frequency domain that you want have? Here we set 0.01s (i.e., 1/50) 
+                              lowerPeriod = 0.1,                    #the fastest period of interest we set at 10Hz (faster than average syllable)
                               upperPeriod = 0.5,                      #the slowest period of interest we set at 2Hz (about the average length of a stroke)
                               make.pval = TRUE) 
   
@@ -168,7 +169,6 @@ Here we see that the main significant areas of the spectrum are around the middl
 - why do we see gesture following, rather than preceding speech? Several studies suggest that, at least for representational gesture, the gesture starts unfolding before the lexical affiliate, and velocity peaks occur closely before the acoustic peak.
 - Is the gesture duration a good window for analysis? 
 
-DIY: re-run these analyses using pitch peak and see how the results change!
 
 ## References
 1. [Issartel, J., Bardainne, T., Gaillot, P., & Marin, L. (2015). The relevance of the cross-wavelet transform in the analysis of human interaction–a tutorial. Frontiers in psychology, 5, 1566.](https://doi.org/10.3389/fpsyg.2014.01566 )
